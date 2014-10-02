@@ -3,7 +3,7 @@
 /*jshint eqnull:true, funcscope:true */
 var HARB = {};
 (function make_harb (HARB) {
-HARB.version = '0.0.1';
+HARB.version = '0.0.2';
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
