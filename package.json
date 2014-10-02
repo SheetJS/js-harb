@@ -7,9 +7,9 @@
 	"files": [ "LICENSE", "README.md", "harb.js", "dist/cpexcel.js" ],
 	"main": "./harb",
 	"dependencies": {
-		"ssf":"^0.8.2",
+		"ssf":"0.8.2",
 		"codepage":"",
-		"babyparse":"^0.2.1",
+		"babyparse":"0.2.1",
 		"commander":""
 	},
 	"devDependencies": {
