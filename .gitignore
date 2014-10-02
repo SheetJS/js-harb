@@ -1,0 +1,16 @@
+node_modules
+misc/coverage.html
+misc/prof.js
+v8.log
+tmp
+*.txt
+*.csv
+*.dif
+*.prn
+*.slk
+*.socialcalc
+*.xls
+*.xlsb
+*.xlsm
+*.xlsx
+*.xml
