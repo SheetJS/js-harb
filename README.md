@@ -7,11 +7,11 @@ Currently supported formats:
 
 - DIF (Data Interchange Format)
 - CSV/TSV/TXT
+- SYLK (Symbolic Link)
 - SocialCalc
 
 Planned but not currently implemented:
 
-- SYLK (Symbolic Link)
 - SC (Spreadsheet Calculator)
 - PRN (Space-Delimited Format)
 
