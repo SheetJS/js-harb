@@ -1,6 +1,6 @@
 {
 	"name": "harb",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"author": "sheetjs",
 	"description": "Plaintext spreadsheet (DIF / CSV / TSV / SocialCalc) parser",
 	"keywords": [ "spreadsheet", "csv", "tsv", "dsv", "dif", "socialcalc" ],
