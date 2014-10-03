@@ -7,12 +7,14 @@ describe('source',function(){it('should load',function(){X=require(modp);});});
 var ex = [".csv",".tsv",".txt",".prn",".dif",".slk",".sc",".socialcalc"];
 if(process.env.FMTS) ex=process.env.FMTS.split(":").map(function(x){return x[0]==="."?x:"."+x;});
 
+var parsefile = function(p) { return function() { X.readFile(p); } };
+
 describe('write.*', function() {
-	it.skip('should parse csv', function() { X.readFile('./test_files/write.csv'); });
-	it('should parse tsv', function() { X.readFile('./test_files/write.txt'); });
-	it('should parse dif', function() { X.readFile('./test_files/write.dif'); });
-	it('should parse slk', function() { X.readFile('./test_files/write.slk'); });
-	it('should fail on prn', function() { assert.throws(function() { X.readFile('./test_files/write.prn'); }); });
-	it.skip('should parse socialcalc', function() { X.readFile('./test_files/write.socialcalc'); });
-	it.skip('should fail on sc', function() { assert.throws(function() { X.readFile('./test_files/write.sc'); }); });
+	it.skip('should parse csv', parsefile('./test_files/write.csv'));
+	it('should parse tsv', parsefile('./test_files/write.txt'));
+	it('should parse dif', parsefile('./test_files/write.dif'));
+	it('should parse slk', parsefile('./test_files/write.slk'));
+	it.skip('should parse prn', parsefile('./test_files/write.prn'));
+	it.skip('should parse socialcalc', parsefile('./test_files/write.socialcalc'));
+	it.skip('should parse sc', parsefile('./test_files/write.sc'));
 });

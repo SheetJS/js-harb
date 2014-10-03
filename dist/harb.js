@@ -3,7 +3,7 @@
 /*jshint eqnull:true, funcscope:true */
 var HARB = {};
 (function make_harb (HARB) {
-HARB.version = '0.0.3';
+HARB.version = '0.0.4';
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
@@ -17,6 +17,18 @@ function datenum(v, date1904) {
 	if(date1904) v+=1462;
 	var epoch = Date.parse(v);
 	return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+}
+
+function numdate(v) {
+	var date = ssf.parse_date_code(v);
+	var val = new Date();
+	val.setUTCFullYear(date.y);
+	val.setUTCMonth(date.m-1);
+	val.setUTCDate(date.d);
+	val.setUTCHours(date.H);
+	val.setUTCMinutes(date.M);
+	val.setUTCSeconds(date.S);
+	return val;
 }
 
 var sheet_to_workbook = function (sheet) { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
@@ -115,11 +127,18 @@ var dif_to_workbook = function (str) { return sheet_to_workbook(dif_to_sheet(str
 /* TODO: find an actual specification */
 var sylk_to_aoa = function(str) {
 	var records = str.split(/[\n\r]+/), R = -1, C = -1, ri = 0, rj = 0, arr = [];
+	var formats = [];
+	var next_cell_format = null;
 	for (; ri !== records.length; ++ri) {
 		var record = records[ri].trim().split(";");
 		var RT = record[0], val;
-		if(RT !== 'C' && RT !== 'F') continue;
-		for(rj=1; rj<record.length; ++rj) switch(record[rj].charAt(0)) {
+		if(RT === 'P') for(rj=1; rj<record.length; ++rj) switch(record[rj].charAt(0)) {
+			case 'P':
+				formats.push(record[rj].substr(1));
+				break;
+		}
+		else if(RT !== 'C' && RT !== 'F') continue;
+		else for(rj=1; rj<record.length; ++rj) switch(record[rj].charAt(0)) {
 			case 'Y':
 				R = parseInt(record[rj].substr(1))-1; C = 0;
 				for(var j = arr.length; j <= R; ++j) arr[j] = [];
@@ -130,9 +149,16 @@ var sylk_to_aoa = function(str) {
 				if(val.charAt(0) === '"') val = val.substr(1,val.length - 2);
 				else if(val === 'TRUE') val = true;
 				else if(val === 'FALSE') val = false;
-				else if(+val === +val) val = +val;
+				else if(+val === +val) {
+					val = +val;
+					if(next_cell_format !== null && next_cell_format.match(/[ymdhmsYMDHMS]/)) val = numdate(val);
+				}
 				arr[R][C] = val;
+				next_cell_format = null;
 				break;
+			case 'P':
+				if(RT !== 'F') break;
+				next_cell_format = formats[parseInt(record[rj].substr(1))];
 		}
 	}
 	return arr;

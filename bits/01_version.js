@@ -1,1 +1,1 @@
-HARB.version = '0.0.3';
+HARB.version = '0.0.4';
