@@ -7,9 +7,9 @@ function datenum(v, date1904) {
 function numdate(v) {
 	var date = ssf.parse_date_code(v);
 	var val = new Date();
-	val.setUTCFullYear(date.y);
-	val.setUTCMonth(date.m-1);
 	val.setUTCDate(date.d);
+	val.setUTCMonth(date.m-1);
+	val.setUTCFullYear(date.y);
 	val.setUTCHours(date.H);
 	val.setUTCMinutes(date.M);
 	val.setUTCSeconds(date.S);

@@ -3,7 +3,7 @@
 /*jshint eqnull:true, funcscope:true */
 var HARB = {};
 (function make_harb (HARB) {
-HARB.version = '0.0.4';
+HARB.version = '0.0.6';
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
@@ -22,9 +22,9 @@ function datenum(v, date1904) {
 function numdate(v) {
 	var date = ssf.parse_date_code(v);
 	var val = new Date();
-	val.setUTCFullYear(date.y);
-	val.setUTCMonth(date.m-1);
 	val.setUTCDate(date.d);
+	val.setUTCMonth(date.m-1);
+	val.setUTCFullYear(date.y);
 	val.setUTCHours(date.H);
 	val.setUTCMinutes(date.M);
 	val.setUTCSeconds(date.S);

@@ -1,4 +1,4 @@
-# harb 
+# harb
 
 Host of Archaic Representations of Books (parsing).  Designed to provide support
 for [j](https://github.com/SheetJS/j).  Pure-JS cleanroom implementation.
@@ -19,13 +19,13 @@ Planned but not currently implemented:
 
 In [nodejs](https://www.npmjs.org/package/harb):
 
-    npm install harb 
+    npm install harb
 
 ## Usage
 
-This module houses provides support for [j](https://www.npmjs.org/package/j). See
-[the xlsx module](http://git.io/xlsx) for usage information, as they use the same
-interface and style. 
+This module provides support for [j](https://www.npmjs.org/package/j). For usage
+information, consult [the xlsx module](http://git.io/xlsx) as they use the same
+interface and style.
 
 ## Test Files
 
@@ -37,6 +37,20 @@ Running `make init` will refresh the `test_files` submodule and get the files.
 
 Due to the precarious nature of the Open Specifications Promise, it is very
 important to ensure code is cleanroom.  Consult CONTRIBUTING.md
+
+The harb.js file is constructed from the files in the `bits` subdirectory. The
+build script (run `make`) will concatenate the individual bits to produce the
+script.  Before submitting a contribution, ensure that running make will produce
+the harb.js file exactly.  The simplest way to test is to move the script:
+
+```
+$ mv harb.js harb.new.js
+$ make
+$ diff harb.js harb.new.js
+```
+
+To produce the dist files, run `make dist`.  The dist files are updated in each
+version release and should not be committed between versions.
 
 ## XLSX Support
 
@@ -57,6 +71,14 @@ OpenOffice (which is governed by the Apache License v2).  Given the vagaries of
 the promise, the Original Author makes no legal claim that in fact end users are
 protected from future actions.  It is highly recommended that, for commercial
 uses, you consult a lawyer before proceeding.
+
+## References
+
+No official specification exists for any of these formats.  For some formats, a
+"reference implementation" is the specification.  When implementations disagree,
+Excel's interpretation is assumed to be correct (unless Excel does not support
+the format, in which case the application that introduced the format is assumed
+to be correct).
 
 ## Badges
 

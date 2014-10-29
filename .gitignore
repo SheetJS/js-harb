@@ -14,3 +14,5 @@ tmp
 *.xlsm
 *.xlsx
 *.xml
+*.htm
+*.html
