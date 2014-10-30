@@ -9,10 +9,6 @@ var csv_to_aoa = function (str) {
 		if(d === '') data[R][C] = null;
 		else if(d === 'TRUE') data[R][C] = true;
 		else if(d === 'FALSE') data[R][C] = false;
-		else if(typeof d === 'string') {
-			var dt = new Date(d);
-			if(dt.getDate() === dt.getDate()) data[R][C] = dt;
-		}
 	}
 	return data;
 };

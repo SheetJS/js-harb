@@ -3,7 +3,7 @@
 /*jshint eqnull:true, funcscope:true */
 var HARB = {};
 (function make_harb (HARB) {
-HARB.version = '0.0.6';
+HARB.version = '0.0.7';
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
@@ -70,10 +70,6 @@ var csv_to_aoa = function (str) {
 		if(d === '') data[R][C] = null;
 		else if(d === 'TRUE') data[R][C] = true;
 		else if(d === 'FALSE') data[R][C] = false;
-		else if(typeof d === 'string') {
-			var dt = new Date(d);
-			if(dt.getDate() === dt.getDate()) data[R][C] = dt;
-		}
 	}
 	return data;
 };
@@ -98,18 +94,14 @@ var dif_to_aoa = function (str) {
 		switch (+type) {
 			case -1:
 				if (data === 'BOT') { arr[++R] = []; C = 0; continue; }
-				else if (data === 'EOD') break;
-				else throw new Error("Unrecognized DIF special command " + data);
-				break; /* technically unreachable */
-			case 0:
-				if(data === 'TRUE') arr[R][C++] = true;
-				else if(data === 'FALSE') arr[R][C++] = false;
-				else if(+value == +value) arr[R][C++] = +value;
-				else {
-					var d = new Date(value);
-					if(d.getDate() === d.getDate()) arr[R][C++] = d;
-				}
+				else if (data !== 'EOD') throw new Error("Unrecognized DIF special command " + data);
 				break;
+			case 0:
+				if(data === 'TRUE') arr[R][C] = true;
+				else if(data === 'FALSE') arr[R][C] = false;
+				else if(+value == +value) arr[R][C] = +value;
+				else arr[R][C] = value;
+				++C; break;
 			case 1:
 				data = data.substr(1,data.length-2);
 				arr[R][C++] = data !== '' ? data : null;
@@ -198,7 +190,8 @@ var sc_to_sheet = function(f) { throw new Error('SC files unsupported'); };
 
 var sc_to_workbook = function (str) { return sheet_to_workbook(sc_to_sheet(str)); };
 
-var read = function (f, opts) {
+var read = function (f, opts, hint) {
+	if(hint === 0xFFFE) return csv_to_workbook(f);
 	if(f.substr(0, 5) === 'TABLE' && f.substr(0, 12).indexOf('0,1') > -1) return dif_to_workbook(f);
 	else if(f.substr(0,2) === 'ID') return sylk_to_workbook(f);
 	else if(f.substr(0,19) === 'socialcalc:version:') return socialcalc_to_workbook(f);
@@ -209,7 +202,7 @@ var read = function (f, opts) {
 
 var readFile = function (f, o) {
 	var b = fs.readFileSync(f);
-	if(((b[0]<<8)|b[1])==0xFFFE) return read(cptable.utils.decode(1200, b.slice(2)), o);
+	if(((b[0]<<8)|b[1])==0xFFFE) return read(cptable.utils.decode(1200, b.slice(2)), o, 0xFFFE);
 	return read(b.toString(), o);
 };
 function decode_row(rowstr) { return parseInt(rowstr,10) - 1; }

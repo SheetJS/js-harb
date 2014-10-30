@@ -10,18 +10,14 @@ var dif_to_aoa = function (str) {
 		switch (+type) {
 			case -1:
 				if (data === 'BOT') { arr[++R] = []; C = 0; continue; }
-				else if (data === 'EOD') break;
-				else throw new Error("Unrecognized DIF special command " + data);
-				break; /* technically unreachable */
-			case 0:
-				if(data === 'TRUE') arr[R][C++] = true;
-				else if(data === 'FALSE') arr[R][C++] = false;
-				else if(+value == +value) arr[R][C++] = +value;
-				else {
-					var d = new Date(value);
-					if(d.getDate() === d.getDate()) arr[R][C++] = d;
-				}
+				else if (data !== 'EOD') throw new Error("Unrecognized DIF special command " + data);
 				break;
+			case 0:
+				if(data === 'TRUE') arr[R][C] = true;
+				else if(data === 'FALSE') arr[R][C] = false;
+				else if(+value == +value) arr[R][C] = +value;
+				else arr[R][C] = value;
+				++C; break;
 			case 1:
 				data = data.substr(1,data.length-2);
 				arr[R][C++] = data !== '' ? data : null;

@@ -1,4 +1,5 @@
-var read = function (f, opts) {
+var read = function (f, opts, hint) {
+	if(hint === 0xFFFE) return csv_to_workbook(f);
 	if(f.substr(0, 5) === 'TABLE' && f.substr(0, 12).indexOf('0,1') > -1) return dif_to_workbook(f);
 	else if(f.substr(0,2) === 'ID') return sylk_to_workbook(f);
 	else if(f.substr(0,19) === 'socialcalc:version:') return socialcalc_to_workbook(f);
@@ -9,6 +10,6 @@ var read = function (f, opts) {
 
 var readFile = function (f, o) {
 	var b = fs.readFileSync(f);
-	if(((b[0]<<8)|b[1])==0xFFFE) return read(cptable.utils.decode(1200, b.slice(2)), o);
+	if(((b[0]<<8)|b[1])==0xFFFE) return read(cptable.utils.decode(1200, b.slice(2)), o, 0xFFFE);
 	return read(b.toString(), o);
 };

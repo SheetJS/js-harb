@@ -17,6 +17,7 @@ tmp
 *.xml
 *.htm
 *.html
+*.sheetjs
 .gitignore
 .jshintrc
 CONTRIBUTING.md
