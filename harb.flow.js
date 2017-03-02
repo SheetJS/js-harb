@@ -4,6 +4,16 @@
 var HARB = {};
 (function make_harb (HARB) {
 HARB.version = '0.1.0';
+/*::
+type AOA = Array<Array<any> >;
+type CellAddrSpec = CellAddress | string; 
+*/
+/*::
+	var babyParse = require('babyparse');
+	var cptable = require('./dist/cpharb');
+	var SSF = require('ssf');
+	var fs = require('fs');
+*/
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
@@ -13,13 +23,13 @@ if (typeof exports !== 'undefined') {
 	}
 }
 
-function datenum(v, date1904) {
+function datenum(v/*:Date*/, date1904/*:?boolean*/)/*:number*/ {
 	var epoch = v.getTime();
 	if(date1904) epoch += 1462*24*60*60*1000;
 	return (epoch + 2209161600000) / (24 * 60 * 60 * 1000);
 }
 
-function numdate(v) {
+function numdate(v/*:number*/)/*:Date*/ {
 	var date = SSF.parse_date_code(v);
 	var val = new Date();
 	if(date == null) throw new Error("Bad Date Code: " + v);
@@ -32,21 +42,21 @@ function numdate(v) {
 	return val;
 }
 
-var sheet_to_workbook = function (sheet) { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
+var sheet_to_workbook = function (sheet/*:Worksheet*/)/*:Workbook*/ { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
 
-function aoa_to_sheet(data, opts) {
+function aoa_to_sheet(data/*:AOA*/, opts)/*:Worksheet*/ {
 	var o = opts || {};
-	var ws = ({});
-	var range = ({s: {c:10000000, r:10000000}, e: {c:0, r:0 }});
+	var ws/*:Worksheet*/ = ({}/*:any*/);
+	var range/*:Range*/ = ({s: {c:10000000, r:10000000}, e: {c:0, r:0 }}/*:any*/);
 	for(var R = 0; R != data.length; ++R) {
 		for(var C = 0; C != data[R].length; ++C) {
 			if(range.s.r > R) range.s.r = R;
 			if(range.s.c > C) range.s.c = C;
 			if(range.e.r < R) range.e.r = R;
 			if(range.e.c < C) range.e.c = C;
-			var cell = ({v: data[R][C] });
+			var cell/*:Cell*/ = ({v: data[R][C] }/*:any*/);
 			if(cell.v == null) continue;
-			var cell_ref = encode_cell(({c:C,r:R}));
+			var cell_ref = encode_cell(({c:C,r:R}/*:any*/));
 			if(typeof cell.v === 'number') cell.t = 'n';
 			else if(typeof cell.v === 'boolean') cell.t = 'b';
 			else if(cell.v instanceof Date) {
@@ -80,7 +90,7 @@ var csv_to_sheet = function (str) { return aoa_to_sheet(csv_to_aoa(str)); };
 
 var csv_to_workbook = function (str) { return sheet_to_workbook(csv_to_sheet(str)); };
 
-function set_text_arr(data, arr, R, C) {
+function set_text_arr(data/*:string*/, arr/*:Array<Array<any> >*/, R/*:number*/, C/*:number*/) {
 	if(data === 'TRUE') arr[R][C] = true;
 	else if(data === 'FALSE') arr[R][C] = false;
 	else if(+data == +data) arr[R][C] = +data;
@@ -225,73 +235,73 @@ var sc_to_workbook = function (str) { return sheet_to_workbook(sc_to_sheet(str))
 
 /* Code Pages Supported by Visual FoxPro */
 var dbf_codepage_map = {
-0x01:   437,
-0x02:   850,
-0x03:  1252,
-0x04: 10000,
-0x64:   852,
-0x65:   866,
-0x66:   865,
-0x67:   861,
-0x68:   895,
-0x69:   620,
-0x6A:   737,
-0x6B:   857,
-0x78:   950,
-0x79:   949,
-0x7A:   936,
-0x7B:   932,
-0x7C:   874,
-0x7D:  1255,
-0x7E:  1256,
-0x96: 10007,
-0x97: 10029,
-0x98: 10006,
-0xC8:  1250,
-0xC9:  1251,
-0xCA:  1254,
-0xCB:  1253,
+	/*::[*/0x01/*::]*/:   437,
+	/*::[*/0x02/*::]*/:   850,
+	/*::[*/0x03/*::]*/:  1252,
+	/*::[*/0x04/*::]*/: 10000,
+	/*::[*/0x64/*::]*/:   852,
+	/*::[*/0x65/*::]*/:   866,
+	/*::[*/0x66/*::]*/:   865,
+	/*::[*/0x67/*::]*/:   861,
+	/*::[*/0x68/*::]*/:   895,
+	/*::[*/0x69/*::]*/:   620,
+	/*::[*/0x6A/*::]*/:   737,
+	/*::[*/0x6B/*::]*/:   857,
+	/*::[*/0x78/*::]*/:   950,
+	/*::[*/0x79/*::]*/:   949,
+	/*::[*/0x7A/*::]*/:   936,
+	/*::[*/0x7B/*::]*/:   932,
+	/*::[*/0x7C/*::]*/:   874,
+	/*::[*/0x7D/*::]*/:  1255,
+	/*::[*/0x7E/*::]*/:  1256,
+	/*::[*/0x96/*::]*/: 10007,
+	/*::[*/0x97/*::]*/: 10029,
+	/*::[*/0x98/*::]*/: 10006,
+	/*::[*/0xC8/*::]*/:  1250,
+	/*::[*/0xC9/*::]*/:  1251,
+	/*::[*/0xCA/*::]*/:  1254,
+	/*::[*/0xCB/*::]*/:  1253,
 
 	/* shapefile DBF extension */
-0x00: 20127,
-0x08:   865,
-0x09:   437,
-0x0A:   850,
-0x0B:   437,
-0x0D:   437,
-0x0E:   850,
-0x0F:   437,
-0x10:   850,
-0x11:   437,
-0x12:   850,
-0x13:   932,
-0x14:   850,
-0x15:   437,
-0x16:   850,
-0x17:   865,
-0x18:   437,
-0x19:   437,
-0x1A:   850,
-0x1B:   437,
-0x1C:   863,
-0x1D:   850,
-0x1F:   852,
-0x22:   852,
-0x23:   852,
-0x24:   860,
-0x25:   850,
-0x26:   866,
-0x37:   850,
-0x40:   852,
-0x4D:   936,
-0x4E:   949,
-0x4F:   950,
-0x50:   874,
-0x57:  1252,
-0x58:  1252,
-0x59:  1252,
+	/*::[*/0x00/*::]*/: 20127,
+	/*::[*/0x08/*::]*/:   865,
+	/*::[*/0x09/*::]*/:   437,
+	/*::[*/0x0A/*::]*/:   850,
+	/*::[*/0x0B/*::]*/:   437,
+	/*::[*/0x0D/*::]*/:   437,
+	/*::[*/0x0E/*::]*/:   850,
+	/*::[*/0x0F/*::]*/:   437,
+	/*::[*/0x10/*::]*/:   850,
+	/*::[*/0x11/*::]*/:   437,
+	/*::[*/0x12/*::]*/:   850,
+	/*::[*/0x13/*::]*/:   932,
+	/*::[*/0x14/*::]*/:   850,
+	/*::[*/0x15/*::]*/:   437,
+	/*::[*/0x16/*::]*/:   850,
+	/*::[*/0x17/*::]*/:   865,
+	/*::[*/0x18/*::]*/:   437,
+	/*::[*/0x19/*::]*/:   437,
+	/*::[*/0x1A/*::]*/:   850,
+	/*::[*/0x1B/*::]*/:   437,
+	/*::[*/0x1C/*::]*/:   863,
+	/*::[*/0x1D/*::]*/:   850,
+	/*::[*/0x1F/*::]*/:   852,
+	/*::[*/0x22/*::]*/:   852,
+	/*::[*/0x23/*::]*/:   852,
+	/*::[*/0x24/*::]*/:   860,
+	/*::[*/0x25/*::]*/:   850,
+	/*::[*/0x26/*::]*/:   866,
+	/*::[*/0x37/*::]*/:   850,
+	/*::[*/0x40/*::]*/:   852,
+	/*::[*/0x4D/*::]*/:   936,
+	/*::[*/0x4E/*::]*/:   949,
+	/*::[*/0x4F/*::]*/:   950,
+	/*::[*/0x50/*::]*/:   874,
+	/*::[*/0x57/*::]*/:  1252,
+	/*::[*/0x58/*::]*/:  1252,
+	/*::[*/0x59/*::]*/:  1252,
 
-0xFF: 16969
+	/*::[*/0xFF/*::]*/: 16969
 };
 
 /* TODO: find an actual specification */
@@ -417,7 +427,7 @@ var dbf_to_sheet = function(buf) { return aoa_to_sheet(dbf_to_aoa(buf), {dateNF:
 
 var dbf_to_workbook = function (buf) { return sheet_to_workbook(dbf_to_sheet(buf)); };
 
-function read_str(f, opts, hint) {
+function read_str(f/*:string*/, opts/*:any*/, hint/*:?any*/)/*:Workbook*/ {
 	if(hint === 0xFFFE) return csv_to_workbook(f);
 	if(f.substr(0, 5) === 'TABLE' && f.substr(0, 12).indexOf('0,1') > -1) return dif_to_workbook(f);
 	else if(f.substr(0,2) === 'ID') return sylk_to_workbook(f);
@@ -428,44 +438,49 @@ function read_str(f, opts, hint) {
 	else return prn_to_workbook(f);
 }
 
-function read_buf(f, opts, hint) {
+function read_buf(f/*:RawData*/, opts/*:?ParseOpts*/, hint/*:?any*/)/*:Workbook*/ {
 	if(f[2] <= 12 && f[3] <= 31) return dbf_to_workbook(f);
 	return read_str(f.toString('binary'), opts);
 }
 
-function read(f, opts, hint) {
+function read(f/*:RawData*/, opts/*:?ParseOpts*/, hint/*:?any*/)/*:Workbook*/ {
 	if(Buffer.isBuffer(f)) return read_buf(f, opts, hint);
 	return read_str(f, opts, hint);
 }
 
-var readFile = function (f, o) {
-	var b = fs.readFileSync(f);
+var readFile = function (f/*:string*/, o/*:?ParseOpts*/)/*:Workbook*/ {
+	var b/*:Buffer*/ = fs.readFileSync(f);
 /*
 	if(b.length === 0) return null;
 */
 	if(((b[0]<<8)|b[1])==0xFFFE) return read_str(cptable.utils.decode(1200, b.slice(2)), o, 0xFFFE);
 	return read_buf(b, o);
 };
-function decode_row(rowstr) { return parseInt(unfix_row(rowstr),10) - 1; }
-function encode_row(row) { return "" + (row + 1); }
-function fix_row(cstr) { return cstr.replace(/([A-Z]|^)(\d+)$/,"$1$$$2"); }
-function unfix_row(cstr) { return cstr.replace(/\$(\d+)$/,"$1"); }
+function decode_row(rowstr/*:string*/)/*:number*/ { return parseInt(unfix_row(rowstr),10) - 1; }
+function encode_row(row/*:number*/)/*:string*/ { return "" + (row + 1); }
+function fix_row(cstr/*:string*/)/*:string*/ { return cstr.replace(/([A-Z]|^)(\d+)$/,"$1$$$2"); }
+function unfix_row(cstr/*:string*/)/*:string*/ { return cstr.replace(/\$(\d+)$/,"$1"); }
 
-function decode_col(colstr) { var c = unfix_col(colstr), d = 0, i = 0; for(; i !== c.length; ++i) d = 26*d + c.charCodeAt(i) - 64; return d - 1; }
-function encode_col(col) { var s=""; for(++col; col; col=Math.floor((col-1)/26)) s = String.fromCharCode(((col-1)%26) + 65) + s; return s; }
-function fix_col(cstr) { return cstr.replace(/^([A-Z])/,"$$$1"); }
-function unfix_col(cstr) { return cstr.replace(/^\$([A-Z])/,"$1"); }
+function decode_col(colstr/*:string*/)/*:number*/ { var c = unfix_col(colstr), d = 0, i = 0; for(; i !== c.length; ++i) d = 26*d + c.charCodeAt(i) - 64; return d - 1; }
+function encode_col(col/*:number*/)/*:string*/ { var s=""; for(++col; col; col=Math.floor((col-1)/26)) s = String.fromCharCode(((col-1)%26) + 65) + s; return s; }
+function fix_col(cstr/*:string*/)/*:string*/ { return cstr.replace(/^([A-Z])/,"$$$1"); }
+function unfix_col(cstr/*:string*/)/*:string*/ { return cstr.replace(/^\$([A-Z])/,"$1"); }
 
-function split_cell(cstr) { return cstr.replace(/(\$?[A-Z]*)(\$?\d*)/,"$1,$2").split(","); }
-function decode_cell(cstr) { var splt = split_cell(cstr); return ({ c:decode_col(splt[0]), r:decode_row(splt[1]) }); }
-function encode_cell(cell) { return encode_col(cell.c) + encode_row(cell.r); }
-function encode_range(cs,ce) {
+function split_cell(cstr/*:string*/)/*:Array<string>*/ { return cstr.replace(/(\$?[A-Z]*)(\$?\d*)/,"$1,$2").split(","); }
+function decode_cell(cstr/*:string*/)/*:CellAddress*/ { var splt = split_cell(cstr); return ({ c:decode_col(splt[0]), r:decode_row(splt[1]) }/*:any*/); }
+function encode_cell(cell/*:CellAddress*/)/*:string*/ { return encode_col(cell.c) + encode_row(cell.r); }
+/*# if only one arg, it is assumed to be a Range.  If 2 args, both are cell addresses */
+function encode_range(cs/*:CellAddrSpec|Range*/,ce/*:?CellAddrSpec*/)/*:string*/ {
 	if(typeof ce === 'undefined' || typeof ce === 'number') {
-return encode_range(cs.s, cs.e);
+/*:: if(!(cs instanceof Range)) throw "unreachable"; */
+		return encode_range(cs.s, cs.e);
 	}
-if(typeof cs !== 'string') cs = encode_cell((cs));
-	if(typeof ce !== 'string') ce = encode_cell((ce));
-return cs == ce ? cs : cs + ":" + ce;
+/*:: if((cs instanceof Range)) throw "unreachable"; */
+	if(typeof cs !== 'string') cs = encode_cell((cs/*:any*/));
+	if(typeof ce !== 'string') ce = encode_cell((ce/*:any*/));
+/*:: if(typeof cs !== 'string') throw "unreachable"; */
+/*:: if(typeof ce !== 'string') throw "unreachable"; */
+	return cs == ce ? cs : cs + ":" + ce;
 }
 
 var utils = {

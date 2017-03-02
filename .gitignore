@@ -5,6 +5,7 @@ v8.log
 tmp
 *.txt
 *.csv
+*.dbf
 *.dif
 *.prn
 *.slk
@@ -17,3 +18,4 @@ tmp
 *.htm
 *.html
 *.sheetjs
+tests

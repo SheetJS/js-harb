@@ -1,12 +1,13 @@
-function datenum(v, date1904) {
-	if(date1904) v+=1462;
-	var epoch = Date.parse(v);
-	return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+function datenum(v/*:Date*/, date1904/*:?boolean*/)/*:number*/ {
+	var epoch = v.getTime();
+	if(date1904) epoch += 1462*24*60*60*1000;
+	return (epoch + 2209161600000) / (24 * 60 * 60 * 1000);
 }
 
-function numdate(v) {
-	var date = ssf.parse_date_code(v);
+function numdate(v/*:number*/)/*:Date*/ {
+	var date = SSF.parse_date_code(v);
 	var val = new Date();
+	if(date == null) throw new Error("Bad Date Code: " + v);
 	val.setUTCDate(date.d);
 	val.setUTCMonth(date.m-1);
 	val.setUTCFullYear(date.y);
@@ -16,5 +17,5 @@ function numdate(v) {
 	return val;
 }
 
-var sheet_to_workbook = function (sheet) { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
+var sheet_to_workbook = function (sheet/*:Worksheet*/)/*:Workbook*/ { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
 

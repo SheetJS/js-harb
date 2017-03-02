@@ -1,12 +1,15 @@
 {
 	"name": "harb",
-	"version": "0.0.7",
+	"version": "0.1.0",
 	"author": "sheetjs",
-	"description": "Plaintext spreadsheet (DIF / CSV / TSV / SocialCalc) parser",
-	"keywords": [ "spreadsheet", "csv", "tsv", "dsv", "dif", "socialcalc" ],
-	"files": [ "LICENSE", "README.md", "harb.js", "dist/cpexcel.js" ],
+	"description": "Plaintext spreadsheet (DIF / CSV / TSV / DBF / SocialCalc) parser",
+	"keywords": [ "spreadsheet", "csv", "tsv", "dsv", "dif", "dbf", "socialcalc" ],
+	"bin": {
+		"harb": "./bin/harb.njs"
+	},
 	"main": "./harb",
 	"dependencies": {
+		"exit-on-epipe":"",
 		"ssf":"0.8.2",
 		"codepage":"",
 		"babyparse":"0.2.1",
@@ -26,6 +29,8 @@
 			"pattern": "harb.js"
 		}
 	},
+	"homepage": "https://oss.sheetjs.com/js-harb/",
+	"files": ["harb.js", "bin/harb.njs", "LICENSE", "README.md", "dist/*.js", "dist/*.map", "dist/LICENSE"],
 	"bugs": { "url": "https://github.com/SheetJS/js-harb/issues" },
 	"license": "Apache-2.0",
 	"engines": { "node": ">=0.8" }
