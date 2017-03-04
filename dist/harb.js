@@ -3,7 +3,7 @@
 /*jshint eqnull:true, funcscope:true */
 var HARB = {};
 (function make_harb (HARB) {
-HARB.version = '0.1.0';
+HARB.version = '0.1.1';
 if (typeof exports !== 'undefined') {
 	if (typeof module !== 'undefined' && module.exports) {
 		babyParse = require('babyparse');
@@ -32,7 +32,11 @@ function numdate(v) {
 	return val;
 }
 
-var sheet_to_workbook = function (sheet) { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
+function sheet_to_workbook(sheet, opts) {
+	var n = opts && opts.sheet ? opts.sheet : "Sheet1";
+	var sheets = {}; sheets[n] = sheet;
+	return { SheetNames: [n], Sheets: sheets };
+}
 
 function aoa_to_sheet(data, opts) {
 	var o = opts || {};
@@ -40,18 +44,20 @@ function aoa_to_sheet(data, opts) {
 	var range = ({s: {c:10000000, r:10000000}, e: {c:0, r:0 }});
 	for(var R = 0; R != data.length; ++R) {
 		for(var C = 0; C != data[R].length; ++C) {
+			if(data[R][C] == null) continue;
+			var cell = ({v: data[R][C] });
 			if(range.s.r > R) range.s.r = R;
 			if(range.s.c > C) range.s.c = C;
 			if(range.e.r < R) range.e.r = R;
 			if(range.e.c < C) range.e.c = C;
-			var cell = ({v: data[R][C] });
-			if(cell.v == null) continue;
 			var cell_ref = encode_cell(({c:C,r:R}));
 			if(typeof cell.v === 'number') cell.t = 'n';
 			else if(typeof cell.v === 'boolean') cell.t = 'b';
 			else if(cell.v instanceof Date) {
-				cell.t = 'n'; cell.z = o.dateNF || SSF._table[14];
+				cell.t = 'n';
+				cell.z = o.dateNF || SSF._table[14];
 				cell.v = datenum(cell.v);
+				cell.w = SSF.format(cell.z, cell.v);
 			}
 			else cell.t = 's';
 			ws[cell_ref] = cell;
@@ -65,7 +71,7 @@ var bpopts = {
 	dynamicTyping: true,
 	keepEmptyRows: true
 };
-var csv_to_aoa = function (str) {
+function csv_to_aoa(str, opts) {
 	var data = babyParse.parse(str, bpopts).data;
 	for(var R=0; R != data.length; ++R) for(var C=0; C != data[R].length; ++C) {
 		var d = data[R][C];
@@ -74,11 +80,11 @@ var csv_to_aoa = function (str) {
 		else if(d === 'FALSE') data[R][C] = false;
 	}
 	return data;
-};
+}
 
-var csv_to_sheet = function (str) { return aoa_to_sheet(csv_to_aoa(str)); };
+function csv_to_sheet(str, opts) { return aoa_to_sheet(csv_to_aoa(str, opts), opts); }
 
-var csv_to_workbook = function (str) { return sheet_to_workbook(csv_to_sheet(str)); };
+function csv_to_workbook(str, opts) { return sheet_to_workbook(csv_to_sheet(str, opts), opts); }
 
 function set_text_arr(data, arr, R, C) {
 	if(data === 'TRUE') arr[R][C] = true;
@@ -87,8 +93,8 @@ function set_text_arr(data, arr, R, C) {
 	else if(data !== "") arr[R][C] = data;
 }
 
-var prn_to_aoa = function(f) {
-	var arr = [];
+function prn_to_aoa(f, opts) {
+	var arr = ([]);
 	if(!f || f.length === 0) return arr;
 	var lines = f.split(/[\r\n]/);
 	var L = lines.length - 1;
@@ -109,13 +115,13 @@ var prn_to_aoa = function(f) {
 			set_text_arr(lines[R].slice(start+(C-1)*10,start+C*10).trim(),arr,R,C);
 	}
 	return arr;
-};
+}
 
-var prn_to_sheet = function (str) { return aoa_to_sheet(prn_to_aoa(str)); };
+function prn_to_sheet(str, opts) { return aoa_to_sheet(prn_to_aoa(str, opts), opts); }
 
-var prn_to_workbook = function (str) { return sheet_to_workbook(prn_to_sheet(str)); };
+function prn_to_workbook(str, opts) { return sheet_to_workbook(prn_to_sheet(str, opts), opts); }
 
-var dif_to_aoa = function (str) {
+function dif_to_aoa(str, opts) {
 	var records = str.split('\n'), R = -1, C = -1, ri = 0, arr = [];
 	for (; ri !== records.length; ++ri) {
 		if (records[ri].trim() === 'BOT') { arr[++R] = []; C = 0; continue; }
@@ -133,6 +139,7 @@ var dif_to_aoa = function (str) {
 				if(data === 'TRUE') arr[R][C] = true;
 				else if(data === 'FALSE') arr[R][C] = false;
 				else if(+value == +value) arr[R][C] = +value;
+				else if(!isNaN(new Date(value).getDate())) arr[R][C] = new Date(value);
 				else arr[R][C] = value;
 				++C; break;
 			case 1:
@@ -143,14 +150,53 @@ var dif_to_aoa = function (str) {
 		if (data === 'EOD') break;
 	}
 	return arr;
-};
+}
 
-var dif_to_sheet = function (str) { return aoa_to_sheet(dif_to_aoa(str)); };
+function dif_to_sheet(str, opts) { return aoa_to_sheet(dif_to_aoa(str, opts), opts); }
 
-var dif_to_workbook = function (str) { return sheet_to_workbook(dif_to_sheet(str)); };
+function dif_to_workbook(str, opts) { return sheet_to_workbook(dif_to_sheet(str, opts), opts); }
 
+
+
+var sheet_to_dif = (function() {
+	var push_field = function pf(o, topic, v, n, s) {
+		o.push(topic);
+		o.push(v + "," + n);
+		o.push('"' + s.replace(/"/g,'""') + '"');
+	};
+	var push_value = function po(o, type, v, s) {
+		o.push(type + "," + v);
+		o.push(type == 1 ? '"' + s.replace(/"/g,'""') + '"' : s);
+	};
+	return function sheet_to_dif(ws, opts) {
+		var o = [];
+		var r = decode_range(ws['!ref']), cell;
+		push_field(o, "TABLE", 0, 1, "sheetjs");
+		push_field(o, "VECTORS", 0, r.e.r - r.s.r + 1,"");
+		push_field(o, "TUPLES", 0, r.e.c - r.s.c + 1,"");
+		push_field(o, "DATA", 0, 0,"");
+		for(var R = r.s.r; R <= r.e.r; ++R) {
+			push_value(o, -1, 0, "BOT");
+			for(var C = r.s.c; C <= r.e.c; ++C) {
+				var coord = encode_cell({r:R,c:C});
+				if(!(cell = ws[coord]) || cell.v == null) { push_value(o, 1, 0, ""); continue;}
+				switch(cell.t) {
+					case 'n': push_value(o, 0, (cell.w || cell.v), "V"); break;
+					case 'b': push_value(o, 0, cell.v ? 1 : 0, cell.v ? "TRUE" : "FALSE"); break;
+					case 's': push_value(o, 1, 0, cell.v); break;
+					default: push_value(o, 1, 0, "");
+				}
+			}
+		}
+		push_value(o, -1, 0, "EOD");
+		var RS = "\r\n";
+		var oo = o.join(RS);
+		//while((oo.length & 0x7F) != 0) oo += "\0";
+		return oo;
+	};
+})();
 /* TODO: find an actual specification */
-var sylk_to_aoa = function(str) {
+function sylk_to_aoa(str, opts) {
 	var records = str.split(/[\n\r]+/), R = -1, C = -1, ri = 0, rj = 0, arr = [];
 	var formats = [];
 	var next_cell_format = null;
@@ -187,14 +233,45 @@ var sylk_to_aoa = function(str) {
 		}
 	}
 	return arr;
-};
+}
 
-var sylk_to_sheet = function(str) { return aoa_to_sheet(sylk_to_aoa(str)); };
+function sylk_to_sheet(str, opts) { return aoa_to_sheet(sylk_to_aoa(str, opts), opts); }
 
-var sylk_to_workbook = function (str) { return sheet_to_workbook(sylk_to_sheet(str)); };
+function sylk_to_workbook(str, opts) { return sheet_to_workbook(sylk_to_sheet(str, opts), opts); }
 
+function write_ws_cell_sylk(cell, ws, R, C, opts) {
+	var o = "C;Y" + (R+1) + ";X" + (C+1) + ";K";
+	switch(cell.t) {
+		case 'n': o += cell.v; break;
+		case 'b': o += cell.v ? "TRUE" : "FALSE"; break;
+		case 'e': o += cell.w || cell.v; break;
+		case 'd': o += '"' + (cell.w || cell.v) + '"'; break;
+		case 's': o += '"' + cell.v.replace(/"/g,"") + '"'; break;
+	}
+	return o;
+}
+
+function sheet_to_sylk(ws, opts) {
+	var preamble = ["ID;PWXL;N;E"], o = [];
+	preamble.push("P;PGeneral");
+	var r = decode_range(ws['!ref']), cell;
+	for(var R = r.s.r; R <= r.e.r; ++R) {
+		for(var C = r.s.c; C <= r.e.c; ++C) {
+			var coord = encode_cell({r:R,c:C});
+			if(!(cell = ws[coord]) || cell.v == null) continue;
+			o.push(write_ws_cell_sylk(cell, ws, R, C, opts));
+		}
+	}
+	preamble.push("F;P0;DG0G8;M255");
+	var RS = "\r\n";
+	return preamble.join(RS) + RS + o.join(RS) + RS + "E" + RS;
+}
 /* TODO: find an actual specification */
-var socialcalc_to_aoa = function(str) {
+function scdecode(s) {
+	return s.replace(/\\b/g, "\\").replace(/\\c/g, ":").replace(/\\n/g,"\n");
+}
+
+function socialcalc_to_aoa(str, opts) {
 	var records = str.split('\n'), R = -1, C = -1, ri = 0, arr = [];
 	for (; ri !== records.length; ++ri) {
 		var record = records[ri].trim().split(":");
@@ -203,7 +280,7 @@ var socialcalc_to_aoa = function(str) {
 		if(arr.length <= addr.r) for(R = arr.length; R <= addr.r; ++R) if(!arr[R]) arr[R] = [];
 		R = addr.r; C = addr.c;
 		switch(record[2]) {
-			case 't': arr[R][C] = record[3]; break;
+			case 't': arr[R][C] = scdecode(record[3]); break;
 			case 'v': arr[R][C] = +record[3]; break;
 			case 'vtc': case 'vtf':
 				switch(record[3]) {
@@ -213,15 +290,94 @@ var socialcalc_to_aoa = function(str) {
 		}
 	}
 	return arr;
-};
+}
 
-var socialcalc_to_sheet = function(str) { return aoa_to_sheet(socialcalc_to_aoa(str)); };
+function socialcalc_to_sheet(str, opts) { return aoa_to_sheet(socialcalc_to_aoa(str, opts), opts); }
 
-var socialcalc_to_workbook = function (str) { return sheet_to_workbook(socialcalc_to_sheet(str)); };
+function socialcalc_to_workbook(str, opts) { return sheet_to_workbook(socialcalc_to_sheet(str, opts), opts); }
 
-var sc_to_sheet = function(f) { throw new Error('SC files unsupported'); };
 
-var sc_to_workbook = function (str) { return sheet_to_workbook(sc_to_sheet(str)); };
+/* originally from http://git.io/xlsx2socialcalc */
+/* xlsx2socialcalc.js (C) 2014-present SheetJS -- http://sheetjs.com */
+var sheet_to_socialcalc = (function() {
+	var header = [
+		"socialcalc:version:1.5",
+		"MIME-Version: 1.0",
+		"Content-Type: multipart/mixed; boundary=SocialCalcSpreadsheetControlSave"
+	].join("\n");
+
+	var sep = [
+		"--SocialCalcSpreadsheetControlSave",
+		"Content-type: text/plain; charset=UTF-8",
+		""
+	].join("\n");
+
+	/* TODO: the other parts */
+	var meta = [
+		"# SocialCalc Spreadsheet Control Save",
+		"part:sheet"
+	].join("\n");
+
+	var end = "--SocialCalcSpreadsheetControlSave--";
+
+	var scencode = function(s) { return s.replace(/\\/g, "\\b").replace(/:/g, "\\c").replace(/\n/g,"\\n"); };
+
+	var scsave = function scsave(ws) {
+		if(!ws || !ws['!ref']) return "";
+		var o = [], oo = [], cell, coord;
+		var r = decode_range(ws['!ref']);
+		for(var R = r.s.r; R <= r.e.r; ++R) {
+			for(var C = r.s.c; C <= r.e.c; ++C) {
+				coord = encode_cell({r:R,c:C});
+				if(!(cell = ws[coord]) || cell.v == null) continue;
+				oo = ["cell", coord, 't'];
+				switch(cell.t) {
+					case 's': case 'str': oo.push(scencode(cell.v)); break;
+					case 'n':
+						if(cell.f) {
+							oo[2] = 'vtf';
+							oo.push('n');
+							oo.push(cell.v);
+							oo.push(scencode(cell.f));
+						}
+						else {
+							oo[2] = 'v';
+							oo.push(cell.v);
+						} break;
+					case 'b':
+						if(cell.f) {
+							oo[2] = 'vtf';
+							oo.push('nl');
+							oo.push(cell.v ? 1 : 0);
+							oo.push(scencode(cell.f));
+						} else {
+							oo[2] = 'vtc';
+							oo.push('nl');
+							oo.push(cell.v ? 1 : 0);
+							oo.push(cell.v ? 'TRUE' : 'FALSE');
+						} break;
+				}
+				o.push(oo.join(":"));
+			}
+		}
+		o.push("sheet:c:" + (r.e.c - r.s.c + 1) + ":r:" + (r.e.r - r.s.r + 1) + ":tvf:1");
+		o.push("valueformat:1:text-wiki");
+		o.push("copiedfrom:" + ws['!ref']);
+		return o.join("\n");
+	};
+
+	return function socialcalcify(ws, opts) {
+		return [header, sep, meta, sep, scsave(ws), end].join("\n");
+		// return ["version:1.5", scsave(ws)].join("\n"); // clipboard form
+	};
+})();
+function sc_to_aoa(str, opts) {
+	throw new Error('SC files unsupported');
+}
+
+function sc_to_sheet(str, opts) { return aoa_to_sheet(sc_to_aoa(str, opts), opts); }
+
+function sc_to_workbook(str, opts) { return sheet_to_workbook(sc_to_sheet(str, opts), opts); }
 
 /* Code Pages Supported by Visual FoxPro */
 var dbf_codepage_map = {
@@ -295,7 +451,7 @@ var dbf_codepage_map = {
 };
 
 /* TODO: find an actual specification */
-var dbf_to_aoa = function(buf) {
+function dbf_to_aoa(buf, opts) {
 	var out = [];
 	/* TODO: browser based */
 	if(typeof Buffer === 'undefined') throw new Error("Buffer support required for DBF");
@@ -377,7 +533,7 @@ var dbf_to_aoa = function(buf) {
 			switch(fields[C].type) {
 				case 'C':
 					out[R][C] = cptable.utils.decode(current_cp, dd);
-					//out[R][C] = out[R][C].trim();
+					out[R][C] = out[R][C].trim();
 					break;
 				case 'D':
 					if(s.length === 8) out[R][C] = new Date(+s.substr(0,4), +s.substr(4,2)-1, +s.substr(6,2));
@@ -411,11 +567,15 @@ var dbf_to_aoa = function(buf) {
 	}
 	if(l < d.length && d[l++] != 0x1A) throw new Error("DBF EOF Marker missing " + (l-1) + " of " + d.length + " " + d[l-1].toString(16));
 	return out;
-};
+}
 
-var dbf_to_sheet = function(buf) { return aoa_to_sheet(dbf_to_aoa(buf), {dateNF: "yyyymmdd"}); };
+function dbf_to_sheet(buf, opts) {
+	var o = opts || {};
+	if(!o.dateNF) o.dateNF = "yyyymmdd";
+	return aoa_to_sheet(dbf_to_aoa(buf, o), o);
+}
 
-var dbf_to_workbook = function (buf) { return sheet_to_workbook(dbf_to_sheet(buf)); };
+function dbf_to_workbook(buf, opts) { return sheet_to_workbook(dbf_to_sheet(buf, opts), opts); }
 
 function read_str(f, opts, hint) {
 	if(hint === 0xFFFE) return csv_to_workbook(f);
@@ -459,6 +619,7 @@ function unfix_col(cstr) { return cstr.replace(/^\$([A-Z])/,"$1"); }
 function split_cell(cstr) { return cstr.replace(/(\$?[A-Z]*)(\$?\d*)/,"$1,$2").split(","); }
 function decode_cell(cstr) { var splt = split_cell(cstr); return ({ c:decode_col(splt[0]), r:decode_row(splt[1]) }); }
 function encode_cell(cell) { return encode_col(cell.c) + encode_row(cell.r); }
+function decode_range(range) { var x =range.split(":").map(decode_cell); return {s:x[0],e:x[x.length-1]}; }
 function encode_range(cs,ce) {
 	if(typeof ce === 'undefined' || typeof ce === 'number') {
 return encode_range(cs.s, cs.e);
@@ -475,7 +636,11 @@ var utils = {
 	encode_range: encode_range,
 	decode_col: decode_col,
 	decode_row: decode_row,
-	decode_cell: decode_cell
+	decode_cell: decode_cell,
+	decode_range: decode_range,
+	sheet_to_dif: sheet_to_dif,
+	sheet_to_sylk: sheet_to_sylk,
+	sheet_to_socialcalc: sheet_to_socialcalc
 };
 HARB.read = read;
 HARB.readFile = readFile;

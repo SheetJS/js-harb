@@ -1,12 +1,12 @@
-function set_text_arr(data/*:string*/, arr/*:Array<Array<any> >*/, R/*:number*/, C/*:number*/) {
+function set_text_arr(data/*:string*/, arr/*:AOA*/, R/*:number*/, C/*:number*/) {
 	if(data === 'TRUE') arr[R][C] = true;
 	else if(data === 'FALSE') arr[R][C] = false;
 	else if(+data == +data) arr[R][C] = +data;
 	else if(data !== "") arr[R][C] = data;
 }
 
-var prn_to_aoa = function(f) {
-	var arr = [];
+function prn_to_aoa(f/*:string*/, opts)/*:AOA*/ {
+	var arr/*:AOA*/ = ([]/*:any*/);
 	if(!f || f.length === 0) return arr;
 	var lines = f.split(/[\r\n]/);
 	var L = lines.length - 1;
@@ -27,9 +27,9 @@ var prn_to_aoa = function(f) {
 			set_text_arr(lines[R].slice(start+(C-1)*10,start+C*10).trim(),arr,R,C);
 	}
 	return arr;
-};
+}
 
-var prn_to_sheet = function (str) { return aoa_to_sheet(prn_to_aoa(str)); };
+function prn_to_sheet(str/*:string*/, opts)/*:Worksheet*/ { return aoa_to_sheet(prn_to_aoa(str, opts), opts); }
 
-var prn_to_workbook = function (str) { return sheet_to_workbook(prn_to_sheet(str)); };
+function prn_to_workbook(str/*:string*/, opts)/*:Workbook*/ { return sheet_to_workbook(prn_to_sheet(str, opts), opts); }
 

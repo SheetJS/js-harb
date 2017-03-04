@@ -1,6 +1,6 @@
 {
 	"name": "harb",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": "sheetjs",
 	"description": "Plaintext spreadsheet (DIF / CSV / TSV / DBF / SocialCalc) parser",
 	"keywords": [ "spreadsheet", "csv", "tsv", "dsv", "dif", "dbf", "socialcalc" ],
@@ -26,7 +26,8 @@
 	},
 	"config": {
 		"blanket": {
-			"pattern": "harb.js"
+			"pattern": "harb.js",
+			"data-cover-never": [ "dist", "node_modules" ]
 		}
 	},
 	"homepage": "https://oss.sheetjs.com/js-harb/",

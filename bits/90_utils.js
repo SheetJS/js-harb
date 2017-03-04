@@ -11,6 +11,7 @@ function unfix_col(cstr/*:string*/)/*:string*/ { return cstr.replace(/^\$([A-Z])
 function split_cell(cstr/*:string*/)/*:Array<string>*/ { return cstr.replace(/(\$?[A-Z]*)(\$?\d*)/,"$1,$2").split(","); }
 function decode_cell(cstr/*:string*/)/*:CellAddress*/ { var splt = split_cell(cstr); return ({ c:decode_col(splt[0]), r:decode_row(splt[1]) }/*:any*/); }
 function encode_cell(cell/*:CellAddress*/)/*:string*/ { return encode_col(cell.c) + encode_row(cell.r); }
+function decode_range(range/*:string*/)/*:Range*/ { var x =range.split(":").map(decode_cell); return {s:x[0],e:x[x.length-1]}; }
 /*# if only one arg, it is assumed to be a Range.  If 2 args, both are cell addresses */
 function encode_range(cs/*:CellAddrSpec|Range*/,ce/*:?CellAddrSpec*/)/*:string*/ {
 	if(typeof ce === 'undefined' || typeof ce === 'number') {
@@ -32,5 +33,9 @@ var utils = {
 	encode_range: encode_range,
 	decode_col: decode_col,
 	decode_row: decode_row,
-	decode_cell: decode_cell
+	decode_cell: decode_cell,
+	decode_range: decode_range,
+	sheet_to_dif: sheet_to_dif,
+	sheet_to_sylk: sheet_to_sylk,
+	sheet_to_socialcalc: sheet_to_socialcalc
 };

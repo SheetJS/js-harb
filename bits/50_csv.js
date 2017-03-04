@@ -2,7 +2,7 @@ var bpopts = {
 	dynamicTyping: true,
 	keepEmptyRows: true
 };
-var csv_to_aoa = function (str) {
+function csv_to_aoa(str/*:string*/, opts)/*:AOA*/ {
 	var data = babyParse.parse(str, bpopts).data;
 	for(var R=0; R != data.length; ++R) for(var C=0; C != data[R].length; ++C) {
 		var d = data[R][C];
@@ -11,9 +11,9 @@ var csv_to_aoa = function (str) {
 		else if(d === 'FALSE') data[R][C] = false;
 	}
 	return data;
-};
+}
 
-var csv_to_sheet = function (str) { return aoa_to_sheet(csv_to_aoa(str)); };
+function csv_to_sheet(str/*:string*/, opts)/*:Worksheet*/ { return aoa_to_sheet(csv_to_aoa(str, opts), opts); }
 
-var csv_to_workbook = function (str) { return sheet_to_workbook(csv_to_sheet(str)); };
+function csv_to_workbook(str/*:string*/, opts)/*:Workbook*/ { return sheet_to_workbook(csv_to_sheet(str, opts), opts); }
 

@@ -5,5 +5,6 @@
 # writes output file to <pwd>/misc/cpharb.js
 P=`pwd`
 cd ${1:-../js-codepage}
+if [ ! -e make.sh ]; then make; fi
 bash make.sh "$P"/misc/harb.csv cpharb.js cptable
 cat cpharb.js cputils.js > "$P"/misc/cpharb.js

@@ -70,8 +70,8 @@ var dbf_codepage_map = {
 };
 
 /* TODO: find an actual specification */
-var dbf_to_aoa = function(buf) {
-	var out = [];
+function dbf_to_aoa(buf, opts)/*:AOA*/ {
+	var out/*:AOA*/ = [];
 	/* TODO: browser based */
 	if(typeof Buffer === 'undefined') throw new Error("Buffer support required for DBF");
 	var d = Buffer.isBuffer(buf) ? buf : new Buffer(buf, 'binary'), l = 0;
@@ -152,7 +152,7 @@ var dbf_to_aoa = function(buf) {
 			switch(fields[C].type) {
 				case 'C':
 					out[R][C] = cptable.utils.decode(current_cp, dd);
-					//out[R][C] = out[R][C].trim();
+					out[R][C] = out[R][C].trim();
 					break;
 				case 'D':
 					if(s.length === 8) out[R][C] = new Date(+s.substr(0,4), +s.substr(4,2)-1, +s.substr(6,2));
@@ -186,9 +186,13 @@ var dbf_to_aoa = function(buf) {
 	}
 	if(l < d.length && d[l++] != 0x1A) throw new Error("DBF EOF Marker missing " + (l-1) + " of " + d.length + " " + d[l-1].toString(16));
 	return out;
-};
+}
 
-var dbf_to_sheet = function(buf) { return aoa_to_sheet(dbf_to_aoa(buf), {dateNF: "yyyymmdd"}); };
+function dbf_to_sheet(buf, opts)/*:Worksheet*/ {
+	var o = opts || {};
+	if(!o.dateNF) o.dateNF = "yyyymmdd";
+	return aoa_to_sheet(dbf_to_aoa(buf, o), o);
+}
 
-var dbf_to_workbook = function (buf) { return sheet_to_workbook(dbf_to_sheet(buf)); };
+function dbf_to_workbook(buf, opts)/*:Workbook*/ { return sheet_to_workbook(dbf_to_sheet(buf, opts), opts); }
 

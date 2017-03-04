@@ -16,6 +16,7 @@ type SSFTable = {[key:number|string]:string};
 declare module 'ssf' {
 	declare function parse_date_code(v:number,opts:any):?SSFDate;
 	declare var _table:SSFTable;
+	declare function format(fmt:any, value:any):string;
 };
 
 type BPResult = any;

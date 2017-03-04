@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* harb.js (C) 2014-present SheetJS -- http://sheetjs.com */
+/* harb.js (C) 2014-present  SheetJS -- http://sheetjs.com */
 var n = "harb";
 /* vim: set ts=2 ft=javascript: */
 var X = require('../');
@@ -10,13 +10,18 @@ program
 	.usage('[options] <file> [sheetname]')
 	.option('-f, --file <file>', 'use specified workbook')
 	.option('-s, --sheet <sheet>', 'print specified sheet (default first sheet)')
-	.option('-p, --password <pw>', 'if file is encrypted, try with specified pw')
+	.option('-N, --sheet-index <idx>', 'use specified sheet index (0-based)')
 	.option('-l, --list-sheets', 'list sheet names and exit')
 	.option('-o, --output <file>', 'output to specified file')
+
 	.option('-S, --formulae', 'print formulae')
 	.option('-j, --json', 'emit formatted JSON (all fields text)')
 	.option('-J, --raw-js', 'emit raw JS object (raw numbers)')
 	.option('-A, --arrays', 'emit rows as JS objects (raw numbers)')
+	.option('-D, --dif', 'emit data interchange format (dif)')
+	.option('-K, --sylk', 'emit symbolic link (sylk)')
+	.option('-E, --socialcalc', 'emit socialcalc')
+
 	.option('-F, --field-sep <sep>', 'CSV field separator', ",")
 	.option('-R, --row-sep <sep>', 'CSV row separator', "\n")
 	.option('-n, --sheet-rows <num>', 'Number of rows to process (0=all rows)')
@@ -55,8 +60,7 @@ if(!fs.existsSync(filename)) {
 var opts = {}, wb/*:?Workbook*/;
 if(program.listSheets) opts.bookSheets = true;
 if(program.sheetRows) opts.sheetRows = program.sheetRows;
-if(program.password) opts.password = program.password;
-if(program.formulae) opts.cellFormula = true;
+else if(program.formulae) opts.cellFormula = true;
 else opts.cellFormula = false;
 
 if(program.all) {
@@ -81,12 +85,16 @@ if(program.read) process.exit(0);
 
 /*::   if(wb) { */
 if(program.listSheets) {
-	console.log(wb.SheetNames.join("\n"));
+	console.log((wb.SheetNames||[]).join("\n"));
 	process.exit(0);
 }
 
+
 var target_sheet = sheetname || '';
-if(target_sheet === '') target_sheet = wb.SheetNames[0];
+if(target_sheet === '') {
+	if(program.sheetIndex < (wb.SheetNames||[]).length) target_sheet = wb.SheetNames[program.sheetIndex];
+	else target_sheet = (wb.SheetNames||[""])[0];
+}
 
 var ws;
 try {
@@ -106,10 +114,13 @@ function get_xlsx() {
 
 var oo = "";
 if(!program.quiet) console.error(target_sheet);
-if(program.formulae) oo = X.utils.get_formulae(ws).join("\n");
+if(program.formulae) oo = get_xlsx().utils.get_formulae(ws).join("\n");
 else if(program.json) oo = JSON.stringify(get_xlsx().utils.sheet_to_row_object_array(ws));
 else if(program.rawJs) oo = JSON.stringify(get_xlsx().utils.sheet_to_row_object_array(ws,{raw:true}));
 else if(program.arrays) oo = JSON.stringify(get_xlsx().utils.sheet_to_row_object_array(ws,{raw:true, header:1}));
+else if(program.dif) oo = X.utils.sheet_to_dif(ws);
+else if(program.sylk) oo = X.utils.sheet_to_sylk(ws);
+else if(program.socialcalc) oo = X.utils.sheet_to_socialcalc(ws);
 else oo = get_xlsx().utils.make_csv(ws, {FS:program.fieldSep, RS:program.rowSep});
 
 if(program.output) fs.writeFileSync(program.output, oo);

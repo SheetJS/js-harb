@@ -17,5 +17,9 @@ function numdate(v/*:number*/)/*:Date*/ {
 	return val;
 }
 
-var sheet_to_workbook = function (sheet/*:Worksheet*/)/*:Workbook*/ { return {SheetNames: ['Sheet1'], Sheets: {Sheet1: sheet}};	};
+function sheet_to_workbook(sheet/*:Worksheet*/, opts)/*:Workbook*/ {
+	var n = opts && opts.sheet ? opts.sheet : "Sheet1";
+	var sheets = {}; sheets[n] = sheet;
+	return { SheetNames: [n], Sheets: sheets };
+}
 

@@ -9,14 +9,14 @@ File format support for known spreadsheet formats:
 |:-------------------------------------------------------------|:-----:|:-----:|
 | **Excel Supported Text Formats**                             |:-----:|:-----:|
 | Delimiter-Separated Values (CSV/TSV/DSV)                     |  :o:  |       |
-| Data Interchange Format (DIF)                                |  :o:  |       |
-| Symbolic Link (SYLK/SLK)                                     |  :o:  |       |
+| Data Interchange Format (DIF)                                |  :o:  |  :o:  |
+| Symbolic Link (SYLK/SLK)                                     |  :o:  |  :o:  |
 | Space-Delimited Text (PRN)                                   |  :o:  |       |
 | UTF-16 Unicode Text (TXT)                                    |  :o:  |       |
 | **Other Workbook/Worksheet Formats**                         |:-----:|:-----:|
 | dBASE II/III/IV / Visual FoxPro (DBF)                        |  :o:  |       |
 | **Other Output Formats**                                     |:-----:|:-----:|
-| SocialCalc                                                   |  :o:  |       |
+| SocialCalc                                                   |  :o:  |  :o:  |
 
 js-harb follows [Common Spreadsheet Format](https://github.com/sheetjs/js-xlsx).
 The objects can be used in conjunction with readers and writers from `js-xlsx`
@@ -25,17 +25,47 @@ and other libraries.
 
 ## Installation
 
-In [nodejs](https://www.npmjs.org/package/harb):
+With [npm](https://www.npmjs.org/package/harb):
 
 ```bash
 $ npm install harb
 ```
 
-## Usage
+## Interface
 
-This module provides support for [j](https://www.npmjs.org/package/j). For usage
-information, consult [the xlsx module](http://git.io/xlsx) as they use the same
-interface and style.
+`HARB` is the exposed variable in the browser and the exported node variable
+
+`HARB.version` is the version of the library (added by the build script).
+
+### Parsing functions
+
+`HARB.read(data, read_opts)` attempts to parse `data`.
+
+`HARB.readFile(filename, read_opts)` attempts to read `filename` and parse.
+
+### Utilities
+
+Utilities are available in the `HARB.utils` object:
+
+Exporting:
+
+- `sheet_to_socialcalc` converts a worksheet object to socialcalc format.
+
+The [utilities from js-xlsx](https://github.com/sheetjs/js-xlsx/#utilities) work
+with the workbook/worksheet objects from js-harb:
+
+- `sheet_to_json` converts a worksheet object to an array of JSON objects.
+  `sheet_to_row_object_array` is an alias that will be removed in the future.
+- `sheet_to_csv` generates delimiter-separated-values output.
+- `sheet_to_formulae` generates a list of the formulae (with value fallbacks).
+
+## Parsing Options
+
+The exported `read` and `readFile` functions accept an options argument:
+
+| Option Name | Default | Description                                          |
+| :---------- | ------: | :--------------------------------------------------- |
+| dateNF      | ""      | override the date format                             |
 
 ## File Formats
 
