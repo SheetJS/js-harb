@@ -1,38 +1,28 @@
 {
 	"name": "harb",
-	"version": "0.1.1",
+	"version": "1.0.0",
 	"author": "sheetjs",
 	"description": "Plaintext spreadsheet (DIF / CSV / TSV / DBF / SocialCalc) parser",
 	"keywords": [ "spreadsheet", "csv", "tsv", "dsv", "dif", "dbf", "socialcalc" ],
-	"bin": {
-		"harb": "./bin/harb.njs"
-	},
 	"main": "./harb",
 	"dependencies": {
-		"exit-on-epipe":"",
-		"ssf":"0.8.2",
-		"codepage":"",
-		"babyparse":"0.2.1",
-		"commander":""
+		"xlsx":""
 	},
 	"devDependencies": {
-		"mocha":"",
-		"uglify-js":""
 	},
-	"repository": { "type":"git", "url":"git://github.com/SheetJS/js-harb.git" },
+	"repository": { "type":"git", "url":"git://github.com/SheetJS/js-xlsx.git" },
 	"scripts": {
 		"pretest": "git submodule init && git submodule update",
 		"test": "make mocha"
 	},
 	"config": {
 		"blanket": {
-			"pattern": "harb.js",
-			"data-cover-never": [ "dist", "node_modules" ]
+			"pattern": "xls.js"
 		}
 	},
-	"homepage": "https://oss.sheetjs.com/js-harb/",
-	"files": ["harb.js", "bin/harb.njs", "LICENSE", "README.md", "dist/*.js", "dist/*.map", "dist/LICENSE"],
-	"bugs": { "url": "https://github.com/SheetJS/js-harb/issues" },
+	"files": ["README.md", "harb.js"],
+	"homepage": "https://oss.sheetjs.com/js-xlsx/",
+	"bugs": { "url": "https://github.com/SheetJS/js-xlsx/issues" },
 	"license": "Apache-2.0",
 	"engines": { "node": ">=0.8" }
 }
